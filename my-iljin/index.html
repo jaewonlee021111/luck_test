@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘의 일진 · 내 사주로 보는 하루 운세</title>
+<meta name="description" content="생년월일시로 내 사주를 뽑고, 매일 바뀌는 일진과의 관계로 오늘의 운세를 확인하세요.">
+<meta property="og:title" content="오늘의 일진 · 내 사주로 보는 하루 운세">
+<meta property="og:description" content="오늘 하늘의 기운은 나와 잘 맞을까?">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E4EBE5; --paper2:#D7E1DA; --ink:#1E2B2F; --muted:#56655F; --line:#B3C2B9;
+  --seal:#A8352A; --field:#F2F6F2;
+  --wood:#3F7D5C; --fire:#C2452D; --earth:#B8902A; --metal:#7E878E; --water:#28406A;
+  --serif:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo",serif;
+  --sans:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#151E21; --paper2:#1D292C; --ink:#E3EAE5; --muted:#9DADA5; --line:#34443F;
+  --seal:#D9604F; --field:#1A2528;
+  --wood:#6DB58C; --fire:#E2705A; --earth:#D9B654; --metal:#B3BCC2; --water:#7E9BD1;
+}}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:620px;margin:0 auto;padding:40px 22px 64px}
+h1,h2,h3{font-family:var(--serif);line-height:1.3;margin:0}
+h2{font-size:1.5rem;font-weight:700;margin-bottom:.4em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:.5em 0}
+.muted{color:var(--muted)}
+.hanja{font-family:var(--serif)}
+
+/* hero: 오늘의 일진을 책력 한 칸처럼 */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center;padding-bottom:34px;border-bottom:1px solid var(--line)}
+.today-col{writing-mode:vertical-rl;font-family:var(--serif);font-weight:900;font-size:5.4rem;line-height:1;letter-spacing:.06em;
+  border:3px solid var(--seal);color:var(--seal);padding:16px 10px;border-radius:4px;position:relative}
+.today-col::after{content:"";position:absolute;inset:4px;border:1px solid var(--seal);border-radius:2px;opacity:.5}
+.hero-date{font-size:.95rem;color:var(--muted);margin:0}
+.hero h1{font-size:2.3rem;font-weight:900;margin:.15em 0 .2em}
+.hero-day{font-family:var(--serif);font-size:1.1rem;margin:0}
+.hero-sub{margin-top:.8em;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  .today-col{animation:stamp .7s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes stamp{from{transform:scale(1.35) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+}
+
+/* form */
+form{padding:30px 0 10px}
+.field{margin-bottom:22px}
+.label{display:block;font-weight:700;margin-bottom:6px}
+.opt{font-weight:400;color:var(--muted);font-size:.9rem}
+input[type=text],input[type=date],input[type=time]{width:100%;font:inherit;color:var(--ink);background:var(--field);
+  border:1px solid var(--line);border-radius:6px;padding:11px 12px;min-height:48px}
+input:disabled{opacity:.45}
+.row{display:flex;gap:14px;align-items:center}
+.row input[type=time]{flex:1}
+.check{display:flex;gap:6px;align-items:center;white-space:nowrap;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--seal)}
+.hint{font-size:.88rem;color:var(--muted);margin:6px 0 0}
+.error{color:var(--seal);font-weight:700}
+button{font:inherit;cursor:pointer;border-radius:6px;min-height:50px;padding:0 22px}
+.primary{width:100%;background:var(--ink);color:var(--paper);border:0;font-family:var(--serif);font-weight:700;font-size:1.1rem}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+:focus-visible{outline:3px solid var(--seal);outline-offset:2px}
+
+/* result */
+#result section{padding:34px 0;border-bottom:1px solid var(--line)}
+#result section:last-of-type{border-bottom:0}
+.who{color:var(--muted);margin:0 0 4px}
+
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 6px}
+.pillar{text-align:center}
+.pillar .cap{font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.pillar .ch{font-family:var(--serif);font-weight:700;font-size:2.1rem;line-height:1;padding:12px 0 8px;border-radius:4px;color:#fff}
+.pillar .ch small{display:block;font-family:var(--sans);font-weight:400;font-size:.78rem;margin-top:6px;opacity:.92}
+.pillar .ch+.ch{margin-top:6px}
+.pillar.me .cap{color:var(--seal);font-weight:700}
+.pillar.empty .ch{background:transparent!important;color:var(--muted);border:1px dashed var(--line)}
+.el-0{background:var(--wood)}.el-1{background:var(--fire)}.el-2{background:var(--earth)}.el-3{background:var(--metal)}.el-4{background:var(--water)}
+.tx-0{color:var(--wood)}.tx-1{color:var(--fire)}.tx-2{color:var(--earth)}.tx-3{color:var(--metal)}.tx-4{color:var(--water)}
+
+.bars{margin-top:20px}
+.bar{display:grid;grid-template-columns:3.2em 1fr 2em;gap:10px;align-items:center;margin:6px 0;font-size:.95rem}
+.bar .track{height:12px;background:var(--paper2);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px;transition:width .6s ease}
+.bar b{font-family:var(--serif)}
+
+.score-row{display:flex;align-items:baseline;gap:16px;margin:10px 0 4px}
+.score{font-family:var(--serif);font-weight:900;font-size:4.2rem;line-height:1;color:var(--seal)}
+.score small{font-size:1.1rem;font-weight:400;color:var(--muted)}
+.god{font-family:var(--serif);font-size:1.25rem;font-weight:700}
+.god-sub{color:var(--muted);font-size:.92rem}
+dl.fortune{margin:20px 0 0;display:grid;grid-template-columns:auto 1fr;gap:12px 16px}
+dl.fortune dt{font-family:var(--serif);font-weight:700;white-space:nowrap}
+dl.fortune dt span{display:block;font-family:var(--sans);font-weight:400;font-size:.8rem;color:var(--muted)}
+dl.fortune dd{margin:0}
+.relation{margin-top:18px;padding:12px 14px;border-left:3px solid var(--seal);background:var(--paper2);border-radius:0 6px 6px 0}
+.advice{margin-top:18px;font-family:var(--serif);font-size:1.12rem}
+
+.lucky{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;text-align:center}
+.lucky div{padding:14px 6px;border:1px solid var(--line);border-radius:6px}
+.lucky .k{font-size:.82rem;color:var(--muted)}
+.lucky .v{font-family:var(--serif);font-weight:700;font-size:1.15rem}
+.swatch{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:1px;border:1px solid var(--line)}
+
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;align-items:end;height:170px}
+.wd{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.8rem}
+.wd .col{width:70%;border-radius:4px 4px 0 0;background:var(--line);min-height:6px}
+.wd.today .col{background:var(--seal)}
+.wd .n{font-family:var(--serif);font-weight:700;margin-bottom:3px}
+.wd .d{margin-top:6px;color:var(--muted)}
+.wd .hj{font-family:var(--serif);font-size:.85rem}
+.wd.today .d{color:var(--seal);font-weight:700}
+
+.actions{display:flex;gap:10px;margin-top:28px}
+.actions .primary{flex:1}
+.toast{text-align:center;color:var(--seal);font-weight:700}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+footer p{margin:.4em 0}
+
+@media (max-width:460px){
+  .wrap{padding-top:28px}
+  .hero{gap:18px}
+  .today-col{font-size:4rem;padding:12px 8px}
+  .hero h1{font-size:1.85rem}
+  .pillar .ch{font-size:1.7rem}
+  .score{font-size:3.4rem}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="today-col" id="todayHanja" aria-hidden="true">甲子</div>
+    <div>
+      <p class="hero-date" id="todayDate"></p>
+      <h1>오늘의 일진</h1>
+      <p class="hero-day" id="todayName"></p>
+      <p class="hero-sub">오늘 하늘의 기운은 나와 잘 맞을까?<br>내 사주와 오늘의 일진을 맞대어 하루를 읽어 드려요.</p>
+    </div>
+  </header>
+
+  <form id="form" autocomplete="off" novalidate>
+    <div class="field">
+      <label class="label" for="name">이름 <span class="opt">(선택)</span></label>
+      <input id="name" type="text" maxlength="20" placeholder="결과 화면에만 표시돼요">
+    </div>
+    <div class="field">
+      <label class="label" for="birth">생년월일 <span class="opt">(양력)</span></label>
+      <input id="birth" type="date" min="1930-01-01" required>
+    </div>
+    <div class="field">
+      <label class="label" for="time">태어난 시간</label>
+      <div class="row">
+        <input id="time" type="time" value="12:00">
+        <label class="check"><input type="checkbox" id="timeUnknown"> 모름</label>
+      </div>
+      <p class="hint">한국 표준시와 실제 태양 시각의 차이(약 30분)를 보정해 계산해요.</p>
+    </div>
+    <p class="error" id="error" role="alert" hidden></p>
+    <button type="submit" class="primary">오늘 운세 보기</button>
+    <p class="hint" style="text-align:center">입력한 정보는 서버로 보내지 않고 이 기기에서만 계산해요.</p>
+  </form>
+
+  <div id="result" hidden>
+    <section aria-labelledby="h-chart">
+      <p class="who" id="rWho"></p>
+      <h2 id="h-chart">나의 사주 원국</h2>
+      <div class="pillars" id="pillars"></div>
+      <div class="bars" id="bars"></div>
+      <p id="rMaster" style="margin-top:18px"></p>
+      <p id="rBalance" class="muted"></p>
+    </section>
+
+    <section aria-labelledby="h-today">
+      <h2 id="h-today">오늘의 운세</h2>
+      <div class="score-row">
+        <div class="score" id="rScore">0<small>점</small></div>
+        <div>
+          <div class="god" id="rGod"></div>
+          <div class="god-sub" id="rGodSub"></div>
+        </div>
+      </div>
+      <p id="rSummary"></p>
+      <div class="relation" id="rRelation" hidden></div>
+      <dl class="fortune" id="rFortune"></dl>
+      <p class="advice" id="rAdvice"></p>
+    </section>
+
+    <section aria-labelledby="h-lucky">
+      <h3 id="h-lucky">오늘의 행운</h3>
+      <p class="muted" id="rLuckyWhy" style="font-size:.92rem"></p>
+      <div class="lucky" id="rLucky"></div>
+    </section>
+
+    <section aria-labelledby="h-week">
+      <h3 id="h-week">이번 주 흐름</h3>
+      <p class="muted" style="font-size:.92rem">오늘부터 7일간의 운세 점수예요. 중요한 약속은 점수 높은 날로 잡아 보세요.</p>
+      <div class="week" id="rWeek"></div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="primary" id="share">결과 공유하기</button>
+      <button type="button" class="ghost" id="again">다시 입력</button>
+    </div>
+    <p class="toast" id="toast" hidden></p>
+  </div>
+
+  <footer>
+    <p>결과는 재미와 참고를 위한 것이며 의료·법률·투자 판단의 근거가 될 수 없습니다.</p>
+    <p>절기는 평균 날짜로 계산해, 절기 당일 무렵에 태어났다면 월주가 실제와 다를 수 있어요. 자정 전후(23시~) 출생은 다음 날 일주로 봐요.</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+/* ───────── 기본 데이터 ───────── */
+const STEMS = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const STEMS_KO = ["갑","을","병","정","무","기","경","신","임","계"];
+const BRANCHES = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const BRANCHES_KO = ["자","축","인","묘","진","사","오","미","신","유","술","해"];
+const ANIMALS = ["쥐","소","호랑이","토끼","용","뱀","말","양","원숭이","닭","개","돼지"];
+const EL_NAME = ["목","화","토","금","수"];
+const EL_WORD = ["나무","불","흙","쇠","물"];
+const STEM_EL = [0,0,1,1,2,2,3,3,4,4];
+const BRANCH_EL = [4,2,0,0,2,1,1,2,3,3,2,4];
+const BRANCH_YANG = [1,0,1,0,1,0,1,0,1,0,1,0];
+
+const MASTER = [
+  {img:"큰 나무", t:"곧게 위로 뻗어 가는 사람이에요. 목표가 생기면 꺾이지 않고 자라고, 사람들을 그늘처럼 품어 줘요. 한번 정한 방향을 바꾸기 어려운 게 숙제예요."},
+  {img:"풀꽃과 덩굴", t:"부드럽지만 끈질긴 사람이에요. 어디서든 틈을 찾아 뿌리내리는 적응력이 있고, 사람 사이를 잇는 감각이 뛰어나요. 남의 시선에 흔들릴 때가 있어요."},
+  {img:"한낮의 태양", t:"밝고 숨김없는 사람이에요. 있는 곳을 환하게 만들고 열정이 쉽게 전염돼요. 쉽게 달아오른 만큼 쉽게 지칠 수 있어요."},
+  {img:"촛불과 등불", t:"조용히 주변을 비추는 사람이에요. 섬세하고 집중력이 깊어 한 사람, 한 가지 일에 마음을 다해요. 속으로 삭이는 감정이 쌓이기 쉬워요."},
+  {img:"큰 산", t:"듬직하고 믿음직한 사람이에요. 쉽게 흔들리지 않아 주변의 중심이 되고, 약속을 지키는 무게가 있어요. 변화에는 시간이 걸리는 편이에요."},
+  {img:"기름진 논밭", t:"무엇이든 길러 내는 사람이에요. 현실 감각과 살림 솜씨가 좋고 사람을 챙기는 데 능해요. 걱정이 많아 생각이 맴돌 때가 있어요."},
+  {img:"단단한 바위와 쇳덩이", t:"결단력 있고 의리 있는 사람이에요. 옳다고 믿는 일엔 망설임이 없고 추진력이 강해요. 말과 태도가 날카롭게 보일 수 있어요."},
+  {img:"갈고닦은 보석", t:"섬세하고 기준이 높은 사람이에요. 감각이 예리하고 깔끔한 결과를 좋아해요. 완벽을 바라다 스스로를 몰아세우기 쉬워요."},
+  {img:"넓은 바다와 강", t:"품이 넓고 지혜로운 사람이에요. 생각의 스케일이 크고 어디로든 흘러가는 자유로움이 있어요. 한곳에 오래 머무는 걸 답답해해요."},
+  {img:"이슬비와 샘물", t:"조용하지만 스며드는 사람이에요. 관찰력과 직관이 뛰어나 분위기를 금세 읽어요. 혼자 생각이 깊어져 표현이 늦을 때가 있어요."}
+];
+
+/* 십성별 오늘의 풀이. score: [총운, 재물, 연애, 일·공부, 건강] */
+const GODS = {
+  "비견":{t:"어깨를 나란히 하는 날", s:"나와 같은 기운이 들어오는 날이에요. 주관이 뚜렷해지고 혼자서도 밀고 나갈 힘이 생겨요. 다만 고집이 세져 남의 말이 귀에 덜 들어올 수 있어요.",
+    m:"큰돈이 들어오기보다 지키는 날이에요. 친구와의 돈 거래는 미루세요.", l:"편한 친구 같은 관계가 깊어져요. 연인과는 대등하게 의견을 나누면 좋아요.",
+    w:"혼자 맡은 일을 끝까지 마무리하기 좋아요. 협업이라면 역할부터 나누세요.", h:"체력은 괜찮지만 무리해서 버티기 쉬워요. 어깨와 목을 자주 풀어 주세요.",
+    a:"내 방식이 정답이라는 생각을 오늘 한 번만 내려놓아 보세요.", sc:[70,58,66,72,72]},
+  "겁재":{t:"경쟁심이 깨어나는 날", s:"승부욕이 올라오고 행동이 빨라져요. 기회를 잡는 힘은 좋지만 충동적인 결정과 지출이 따라오기 쉬워요.",
+    m:"지출이 새기 쉬운 날이에요. 충동구매와 투자 결정은 하루 미루세요.", l:"질투나 비교하는 마음이 올라올 수 있어요. 말보다 행동으로 표현하세요.",
+    w:"경쟁이 붙는 일에서 강해요. 공을 나누는 태도가 뒤탈을 막아 줘요.", h:"급하게 움직이다 다치기 쉬워요. 운동은 준비운동부터 하세요.",
+    a:"이기는 것보다 잃지 않는 것에 집중하세요.", sc:[58,45,55,64,60]},
+  "식신":{t:"즐거움이 흘러나오는 날", s:"표현력과 여유가 살아나는 날이에요. 먹고 즐기고 만드는 일에 운이 따르고, 사람들이 내 곁을 편하게 느껴요.",
+    m:"꾸준히 해 온 일에서 작은 보상이 들어와요. 맛있는 데 쓰는 돈은 아깝지 않은 날이에요.", l:"자연스러운 매력이 드러나요. 함께 밥 먹자는 한마디가 좋은 시작이 돼요.",
+    w:"아이디어가 잘 떠오르고 손이 잘 풀려요. 만드는 일, 가르치는 일에 좋아요.", h:"소화와 컨디션이 좋은 편이에요. 과식만 조심하세요.",
+    a:"미뤄 둔 작은 취미를 오늘 시작해 보세요.", sc:[85,74,82,80,84]},
+  "상관":{t:"말이 날카로워지는 날", s:"재치와 비판력이 강해지는 날이에요. 남다른 시각이 빛나지만 윗사람이나 규칙과 부딪히기 쉬워요.",
+    m:"부수입 아이디어가 떠오를 수 있어요. 계약서는 꼼꼼히 다시 읽으세요.", l:"솔직함이 상처가 될 수 있어요. 한 번 삼킨 말이 관계를 지켜요.",
+    w:"기획, 글쓰기, 발표처럼 표현하는 일에 강해요. 상사와의 논쟁은 피하세요.", h:"신경이 예민해지기 쉬워요. 잠들기 전에는 화면을 멀리하세요.",
+    a:"맞는 말도 부드럽게 하면 두 배로 전달돼요.", sc:[62,64,52,70,60]},
+  "편재":{t:"기회가 움직이는 날", s:"활동 반경이 넓어지고 사람과 돈이 함께 움직이는 날이에요. 즉흥적인 만남이나 제안에서 기회가 생겨요.",
+    m:"예상 밖의 수입이나 좋은 정보가 들어올 수 있어요. 다만 크게 걸면 크게 흔들려요.", l:"새로운 사람과 인연이 닿기 쉬워요. 가벼운 약속에 나가 보세요.",
+    w:"영업, 협상, 외근처럼 밖에서 하는 일이 잘 풀려요.", h:"바쁘게 다니느라 끼니를 거르기 쉬워요.",
+    a:"들어온 기회는 잡되, 감당할 만큼만 걸어 보세요.", sc:[76,84,76,72,66]},
+  "정재":{t:"차곡차곡 쌓이는 날", s:"성실함이 그대로 결과로 돌아오는 날이에요. 계획한 대로 움직이면 실수 없이 하루를 마칠 수 있어요.",
+    m:"가계부를 정리하거나 저축을 시작하기 좋은 날이에요. 꼼꼼한 계산이 이득이 돼요.", l:"안정감 있는 태도가 신뢰를 줘요. 작은 약속을 지키는 게 큰 표현이에요.",
+    w:"정리, 회계, 마감처럼 정확함이 필요한 일에 강해요.", h:"규칙적인 식사와 수면이 컨디션을 지켜 줘요.",
+    a:"오늘 할 일을 세 가지만 적고 하나씩 지워 보세요.", sc:[80,86,74,78,76]},
+  "편관":{t:"압박을 견디는 날", s:"책임과 부담이 한꺼번에 몰려오는 날이에요. 버거울 수 있지만 잘 넘기면 실력을 인정받는 계기가 돼요.",
+    m:"갑작스러운 지출이 생길 수 있어요. 비상금을 한 번 확인해 두세요.", l:"상대의 요구가 부담스럽게 느껴질 수 있어요. 지친 마음을 솔직히 말하세요.",
+    w:"어렵거나 급한 일이 떨어져요. 우선순위만 정하면 해낼 수 있어요.", h:"스트레스가 몸으로 오기 쉬워요. 무리한 운동보다 휴식을 택하세요.",
+    a:"모든 걸 혼자 짊어지지 말고 도움을 청하세요.", sc:[60,55,58,66,52]},
+  "정관":{t:"신뢰를 얻는 날", s:"질서와 원칙이 힘이 되는 날이에요. 맡은 역할을 반듯하게 해내면 주변의 인정과 좋은 평판이 따라와요.",
+    m:"안정적인 수입 흐름을 점검하기 좋아요. 돈 문제는 공식적인 절차로 처리하세요.", l:"진지한 대화가 관계를 한 단계 올려 줘요. 소개나 만남 운도 좋아요.",
+    w:"면접, 평가, 보고처럼 공식적인 자리에서 좋은 인상을 남겨요.", h:"컨디션이 고르게 유지돼요. 앉은 자세를 바르게 하세요.",
+    a:"약속 시간 10분 전 도착. 오늘은 그것만으로도 운이 열려요.", sc:[80,72,80,84,76]},
+  "편인":{t:"생각이 깊어지는 날", s:"직관과 영감이 강해지는 날이에요. 혼자만의 시간이 필요하고, 남들이 못 보는 것을 보게 돼요. 생각이 많아 행동은 늦어질 수 있어요.",
+    m:"돈보다 정보와 배움에 쓰는 게 이득인 날이에요.", l:"말수가 줄어 오해를 살 수 있어요. 짧게라도 안부를 전하세요.",
+    w:"연구, 분석, 기획처럼 깊이 파고드는 일에 좋아요.", h:"잠이 얕아지기 쉬워요. 따뜻한 차 한 잔이 도움이 돼요.",
+    a:"떠오른 생각을 메모해 두세요. 나중에 꼭 쓸모가 생겨요.", sc:[65,58,58,74,64]},
+  "정인":{t:"도움이 들어오는 날", s:"주변의 지원과 배려가 들어오는 날이에요. 배우고 받아들이는 힘이 커져서 공부나 자격 준비에 특히 좋아요.",
+    m:"문서나 계약 관련 운이 좋아요. 윗사람의 조언을 들어 보세요.", l:"따뜻한 보살핌을 주고받는 날이에요. 가족과 보내는 시간도 좋아요.",
+    w:"공부, 시험, 자격증 준비에 집중력이 높아요.", h:"마음이 편안해져 회복력이 좋은 날이에요.",
+    a:"고마운 사람에게 짧은 메시지를 보내 보세요.", sc:[82,70,78,82,84]}
+};
+const GOD_SUB = {"비견":"나와 같은 기운","겁재":"나와 겨루는 기운","식신":"내가 베푸는 기운","상관":"내가 드러내는 기운","편재":"내가 움직이는 재물","정재":"내가 모으는 재물",
+  "편관":"나를 단련하는 기운","정관":"나를 바로 세우는 기운","편인":"나를 깨우는 기운","정인":"나를 돕는 기운"};
+
+const LUCKY = [
+  {color:["초록","청록"],hex:["#3F9D63","#2C8C8C"],num:[3,8],dir:"동쪽",item:["화분","나무 소품","녹차"]},
+  {color:["빨강","주황"],hex:["#D2452F","#E8873A"],num:[2,7],dir:"남쪽",item:["향초","따뜻한 음료","선글라스"]},
+  {color:["노랑","베이지"],hex:["#E0B53B","#D8C3A0"],num:[5,10],dir:"가운데",item:["도자기 컵","고구마","가죽 소품"]},
+  {color:["흰색","은색"],hex:["#F5F5F2","#B9C0C6"],num:[4,9],dir:"서쪽",item:["시계","은반지","금속 볼펜"]},
+  {color:["남색","검정"],hex:["#2A3F72","#1D1D1D"],num:[1,6],dir:"북쪽",item:["물 한 병","우산","파란 펜"]}
+];
+
+/* ───────── 간지 계산 ───────── */
+const mod = (n,m)=>((n%m)+m)%m;
+function dayIndex(y,m,d){ // 60갑자 순번 (0=甲子). 2000-01-01 = 戊午(54)
+  const days = Math.floor(Date.UTC(y,m-1,d)/86400000);
+  return mod(days + 2440588 + 49, 60);
+}
+const TERMS = [[2,4],[3,6],[4,5],[5,6],[6,6],[7,7],[8,8],[9,8],[10,8],[11,7],[12,7]]; // 입춘~대설
+function monthSlot(m,d){ // 0=寅월 ... 11=丑월
+  const v=m*100+d;
+  if(v<106) return 10;   // 대설 이후 子월
+  if(v<204) return 11;   // 소한 이후 丑월
+  let k=0; for(let i=0;i<TERMS.length;i++){ if(v>=TERMS[i][0]*100+TERMS[i][1]) k=i; }
+  return k;
+}
+function sajuOf(y,m,d,hh,mm,timeKnown){
+  // 한국 표준시 → 실제 태양시 근사 보정(-30분)
+  let dt = new Date(Date.UTC(y,m-1,d,timeKnown?hh:12,timeKnown?mm:0) - (timeKnown?30*60000:0));
+  let Y=dt.getUTCFullYear(), M=dt.getUTCMonth()+1, D=dt.getUTCDate(), H=dt.getUTCHours();
+  const v=M*100+D;
+  const yy = v<204 ? Y-1 : Y;
+  const yS=mod(yy-4,10), yB=mod(yy-4,12);
+  const slot=monthSlot(M,D);
+  const mS=mod([2,4,6,8,0][yS%5]+slot,10), mB=mod(slot+2,12);
+  let dayDate = dt;
+  if(timeKnown && H>=23) dayDate = new Date(dt.getTime()+86400000);
+  const di = dayIndex(dayDate.getUTCFullYear(),dayDate.getUTCMonth()+1,dayDate.getUTCDate());
+  const dS=di%10, dB=di%12;
+  let hour=null;
+  if(timeKnown){
+    const hB=Math.floor((H+1)/2)%12;
+    const hS=mod([0,2,4,6,8][dS%5]+hB,10);
+    hour={s:hS,b:hB};
+  }
+  return {year:{s:yS,b:yB},month:{s:mS,b:mB},day:{s:dS,b:dB},hour};
+}
+function tenGod(me, other){
+  const a=STEM_EL[me], b=STEM_EL[other], same=(me%2)===(other%2);
+  if(a===b) return same?"비견":"겁재";
+  if(b===mod(a+1,5)) return same?"식신":"상관";
+  if(b===mod(a+2,5)) return same?"편재":"정재";
+  if(a===mod(b+2,5)) return same?"편관":"정관";
+  return same?"편인":"정인";
+}
+const SIX_HAP=[[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]];
+const TRI=[[8,0,4],[2,6,10],[5,9,1],[11,3,7]];
+function branchRel(a,b){
+  if(a===b) return "same";
+  if(mod(a-b,12)===6) return "chung";
+  if(SIX_HAP.some(p=>(p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))) return "hap";
+  if(TRI.some(g=>g.includes(a)&&g.includes(b))) return "samhap";
+  return null;
+}
+function hash(str){ let h=2166136261; for(const c of str){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+
+function fortuneFor(saju, counts, y,m,d, seedBase){
+  const di=dayIndex(y,m,d), tS=di%10, tB=di%12;
+  const god=tenGod(saju.day.s,tS), g=GODS[god];
+  const rel=branchRel(saju.day.b,tB);
+  const sc=g.sc.slice();
+  const relAdj={hap:[8,4,10,6,4],samhap:[5,4,6,4,3],chung:[-10,-6,-8,-6,-14],same:[0,0,0,0,0]}[rel]||[0,0,0,0,0];
+  const minC=Math.min(...counts);
+  const helps = counts[STEM_EL[tS]]===minC ? 4 : 0; // 부족한 오행이 들어오는 날
+  const h=hash(seedBase+"|"+y+"-"+m+"-"+d);
+  const out=sc.map((v,i)=>Math.max(28,Math.min(98, v+relAdj[i]+helps+((h>>(i*3))%9)-4)));
+  return {di,tS,tB,god,g,rel,scores:out,total:out[0],h};
+}
+
+/* ───────── 화면 ───────── */
+const $=id=>document.getElementById(id);
+const WEEK=["일","월","화","수","목","금","토"];
+const now=new Date(); const TY=now.getFullYear(), TM=now.getMonth()+1, TD=now.getDate();
+const todayIdx=dayIndex(TY,TM,TD);
+$("todayHanja").textContent=STEMS[todayIdx%10]+BRANCHES[todayIdx%12];
+$("todayDate").textContent=`${TY}년 ${TM}월 ${TD}일 ${WEEK[now.getDay()]}요일`;
+(function(){const w=EL_WORD[STEM_EL[todayIdx%10]];const j=/[불흙물]$/.test(w)?"과":"와";$("todayName").textContent=`${STEMS_KO[todayIdx%10]}${BRANCHES_KO[todayIdx%12]}일 · ${w}${j} ${EL_WORD[BRANCH_EL[todayIdx%12]]}의 날`;})();
+$("birth").max=`${TY}-${String(TM).padStart(2,"0")}-${String(TD).padStart(2,"0")}`;
+
+$("timeUnknown").addEventListener("change",e=>{$("time").disabled=e.target.checked;});
+
+function cell(s,isStem){
+  const el=isStem?STEM_EL[s]:BRANCH_EL[s];
+  const ch=isStem?STEMS[s]:BRANCHES[s], ko=isStem?STEMS_KO[s]:BRANCHES_KO[s];
+  return `<div class="ch el-${el}">${ch}<small>${ko} · ${EL_NAME[el]}</small></div>`;
+}
+function render(input){
+  const [y,m,d]=input.birth.split("-").map(Number);
+  let hh=12,mm=0; const known=!!input.time;
+  if(known){[hh,mm]=input.time.split(":").map(Number);}
+  const saju=sajuOf(y,m,d,hh,mm,known);
+
+  // 원국
+  const cols=[["시주",saju.hour],["일주",saju.day],["월주",saju.month],["년주",saju.year]];
+  $("pillars").innerHTML=cols.map(([cap,p],i)=>{
+    if(!p) return `<div class="pillar empty"><div class="cap">${cap}</div><div class="ch">?<small>모름</small></div><div class="ch">?<small>모름</small></div></div>`;
+    return `<div class="pillar${i===1?" me":""}"><div class="cap">${cap}${i===1?" (나)":""}</div>${cell(p.s,true)}${cell(p.b,false)}</div>`;
+  }).join("");
+
+  // 오행 분포
+  const counts=[0,0,0,0,0];
+  [saju.year,saju.month,saju.day,saju.hour].forEach(p=>{if(p){counts[STEM_EL[p.s]]++;counts[BRANCH_EL[p.b]]++;}});
+  const total=counts.reduce((a,b)=>a+b,0);
+  $("bars").innerHTML=counts.map((c,i)=>`<div class="bar"><b class="tx-${i}">${EL_WORD[i]}</b><div class="track"><div class="fill el-${i}" style="width:${Math.round(c/total*100)}%"></div></div><span>${c}</span></div>`).join("");
+
+  const me=saju.day.s, M=MASTER[me];
+  $("rWho").textContent=(input.name?input.name+"님은 ":"당신은 ")+`${ANIMALS[saju.year.b]}띠, ${STEMS_KO[me]}${EL_NAME[STEM_EL[me]]} 일간`;
+  $("rMaster").innerHTML=`<b class="hanja tx-${STEM_EL[me]}">${STEMS[me]}${EL_NAME[STEM_EL[me]]}</b>, ${M.img}의 기운을 타고났어요. ${M.t}`;
+  const maxC=Math.max(...counts), minC=Math.min(...counts);
+  const strong=counts.map((c,i)=>c===maxC?EL_WORD[i]:null).filter(Boolean);
+  const weak=counts.map((c,i)=>c===minC?EL_WORD[i]:null).filter(Boolean);
+  $("rBalance").textContent=minC===0
+    ? `${strong.join("·")} 기운이 강하고, ${weak.join("·")} 기운이 비어 있어요. 비어 있는 기운이 들어오는 날 운이 한층 살아나요.`
+    : `${strong.join("·")} 기운이 가장 강하고 ${weak.join("·")} 기운이 가장 약해요. 고르게 갖춘 편이라 큰 흔들림이 적어요.`;
+
+  // 오늘
+  const seed=input.birth+(input.time||"");
+  const f=fortuneFor(saju,counts,TY,TM,TD,seed);
+  $("rScore").innerHTML=`${f.total}<small>점</small>`;
+  $("rGod").textContent=f.g.t;
+  $("rGodSub").innerHTML=`오늘의 일간 <span class="hanja">${STEMS[f.tS]}</span>은 나에게 <b>${f.god}</b>, ${GOD_SUB[f.god]}이에요`;
+  $("rSummary").textContent=f.g.s;
+  const relText={
+    hap:`오늘의 지지 <span class="hanja">${BRANCHES[f.tB]}</span>가 내 일지 <span class="hanja">${BRANCHES[saju.day.b]}</span>와 합(合)을 이뤄요. 사람과의 일이 부드럽게 풀려요.`,
+    samhap:`오늘의 지지 <span class="hanja">${BRANCHES[f.tB]}</span>와 내 일지 <span class="hanja">${BRANCHES[saju.day.b]}</span>가 같은 무리로 모여요(삼합). 뜻이 맞는 사람을 만나기 쉬워요.`,
+    chung:`오늘의 지지 <span class="hanja">${BRANCHES[f.tB]}</span>가 내 일지 <span class="hanja">${BRANCHES[saju.day.b]}</span>와 부딪혀요(충). 이동과 변화가 많고 계획이 틀어질 수 있으니 여유 있게 움직이세요.`,
+    same:`오늘의 지지가 내 일지 <span class="hanja">${BRANCHES[saju.day.b]}</span>와 같아요. 익숙한 흐름이 되풀이되는 날이에요.`
+  }[f.rel];
+  $("rRelation").hidden=!relText; if(relText) $("rRelation").innerHTML=relText;
+  const rows=[["재물","돈",f.g.m,1],["연애","사람",f.g.l,2],["일·공부","성과",f.g.w,3],["건강","몸",f.g.h,4]];
+  $("rFortune").innerHTML=rows.map(r=>`<dt>${r[0]}<span>${f.scores[r[3]]}점</span></dt><dd>${r[2]}</dd>`).join("");
+  $("rAdvice").textContent="“"+f.g.a+"”";
+
+  // 행운: 원국에서 가장 약한 오행으로
+  const weakIdx=counts.indexOf(minC), L=LUCKY[weakIdx], pick=f.h%2;
+  $("rLuckyWhy").textContent=`내 사주에서 가장 약한 ${EL_WORD[weakIdx]} 기운을 채워 주는 것들이에요.`;
+  $("rLucky").innerHTML=
+    `<div><div class="k">색</div><div class="v"><span class="swatch" style="background:${L.hex[pick]}"></span>${L.color[pick]}</div></div>`+
+    `<div><div class="k">숫자</div><div class="v">${L.num[pick]}</div></div>`+
+    `<div><div class="k">방향</div><div class="v">${L.dir}</div></div>`;
+
+  // 주간
+  let week="";
+  for(let i=0;i<7;i++){
+    const dt=new Date(TY,TM-1,TD+i);
+    const ff=i===0?f:fortuneFor(saju,counts,dt.getFullYear(),dt.getMonth()+1,dt.getDate(),seed);
+    week+=`<div class="wd${i===0?" today":""}"><span class="n">${ff.total}</span><div class="col" style="height:${Math.round((ff.total-20)/80*110)}px"></div><span class="d">${i===0?"오늘":WEEK[dt.getDay()]}</span><span class="hj">${STEMS[ff.tS]}${BRANCHES[ff.tB]}</span></div>`;
+  }
+  $("rWeek").innerHTML=week;
+
+  $("result").hidden=false;
+  $("form").hidden=true;
+  window.scrollTo({top:$("result").offsetTop-10,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+}
+
+function readInput(){
+  return {name:$("name").value.trim(), birth:$("birth").value, time:$("timeUnknown").checked?"":$("time").value};
+}
+$("form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const inp=readInput();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(inp.birth)){ $("error").textContent="생년월일을 입력해 주세요."; $("error").hidden=false; $("birth").focus(); return; }
+  if(inp.birth>$("birth").max || inp.birth<"1930-01-01"){ $("error").textContent="1930년 1월 1일부터 오늘 사이의 날짜를 입력해 주세요."; $("error").hidden=false; return; }
+  $("error").hidden=true;
+  try{localStorage.setItem("iljin:last",JSON.stringify(inp));}catch(_){}
+  const q=new URLSearchParams({b:inp.birth.replaceAll("-","")}); if(inp.time) q.set("t",inp.time.replace(":","")); if(inp.name) q.set("n",inp.name);
+  history.replaceState(null,"","?"+q.toString());
+  render(inp);
+});
+$("again").addEventListener("click",()=>{ $("result").hidden=true; $("form").hidden=false; history.replaceState(null,"",location.pathname); window.scrollTo({top:0}); });
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; setTimeout(()=>t.hidden=true,2200); }
+$("share").addEventListener("click",async()=>{
+  const url=location.href, text=`오늘 내 일진 운세는 ${$("rScore").textContent.replace("점","")}점! ${$("rGod").textContent}`;
+  if(navigator.share){ try{ await navigator.share({title:document.title,text,url}); return; }catch(_){ return; } }
+  try{ await navigator.clipboard.writeText(text+"\n"+url); toast("링크를 복사했어요"); }catch(_){ toast("주소창의 링크를 복사해 공유해 주세요"); }
+});
+
+// 공유 링크로 들어왔거나 이전 입력이 있으면 채워 두기
+(function boot(){
+  const p=new URLSearchParams(location.search), b=p.get("b");
+  if(b && /^\d{8}$/.test(b)){
+    const inp={name:p.get("n")||"", birth:`${b.slice(0,4)}-${b.slice(4,6)}-${b.slice(6,8)}`, time:""};
+    const t=p.get("t"); if(t&&/^\d{4}$/.test(t)) inp.time=`${t.slice(0,2)}:${t.slice(2)}`;
+    $("name").value=inp.name; $("birth").value=inp.birth;
+    if(inp.time) $("time").value=inp.time; else { $("timeUnknown").checked=true; $("time").disabled=true; }
+    render(inp); return;
+  }
+  try{
+    const s=JSON.parse(localStorage.getItem("iljin:last")||"null");
+    if(s&&s.birth){ $("name").value=s.name||""; $("birth").value=s.birth; if(s.time) $("time").value=s.time; else {$("timeUnknown").checked=true;$("time").disabled=true;} }
+  }catch(_){}
+})();
+})();
+</script>
+</body>
+</html>
